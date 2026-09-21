@@ -26,8 +26,8 @@ INTERVAL = os.getenv("INTERVAL", "15m")
 FAST_SMA = int(os.getenv("FAST_SMA", "9"))
 SLOW_SMA = int(os.getenv("SLOW_SMA", "21"))
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8252437697:AAEz1kWw9Zn0ST-hneFVN7oL76jZxFnkPEQ")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "8252437697")
 
 
 def send_telegram(message: str) -> None:
