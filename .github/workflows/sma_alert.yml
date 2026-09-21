@@ -1,0 +1,29 @@
+name: SMA Sinyal Bildirimi
+
+"on":
+  schedule:
+    - cron: "*/15 * * * *"   # her 15 dakikada bir (GitHub gecikmeli calistirabilir)
+  workflow_dispatch: {}       # "Run workflow" butonuyla elle de calistirilabilir
+
+jobs:
+  check-signal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Sinyal kontrol et ve gerekirse Telegram'a bildir
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SYMBOL: BTCUSDT
+          INTERVAL: 15m
+          FAST_SMA: "9"
+          SLOW_SMA: "21"
+        run: python signal_check.py
