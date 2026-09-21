@@ -75,6 +75,7 @@ def check_signal(closed: list, fast: int, slow: int):
 
 
 def main():
+    send_telegram("Test mesaji - bot calisiyor!")
     limit = SLOW_SMA + 3
     try:
         closes = fetch_closes(SYMBOL, INTERVAL, limit)
