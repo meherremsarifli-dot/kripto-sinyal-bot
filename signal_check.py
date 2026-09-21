@@ -43,11 +43,15 @@ def send_telegram(message: str) -> None:
 
 
 def fetch_closes(symbol: str, interval: str, limit: int) -> list:
-    url = "https://api.binance.com/api/v3/klines"
+    # data-api.binance.vision: Binance'in herkese acik piyasa verisi icin
+    # ayirdigi, bulut/CI sunucularindan (ör. GitHub Actions) da erisilebilen
+    # adres. api.binance.com bazi bulut IP araliklarini engelleyebiliyor.
+    url = "https://data-api.binance.vision/api/v3/klines"
     resp = requests.get(
         url, params={"symbol": symbol, "interval": interval, "limit": limit}, timeout=15
     )
-    resp.raise_for_status()
+    if resp.status_code != 200:
+        raise RuntimeError(f"Binance API hatasi {resp.status_code}: {resp.text[:300]}")
     rows = resp.json()
     return [float(r[4]) for r in rows]
 
