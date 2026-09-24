@@ -1,17 +1,21 @@
-name: SMA Sinyal Bildirimi
+name: BTC 1-3R Sinyal Bildirimi
 
 "on":
   schedule:
-    - cron: "*/15 * * * *"   # her 15 dakikada bir (GitHub gecikmeli calistirabilir)
-  workflow_dispatch: {}       # "Run workflow" butonuyla elle de calistirilabilir
+    # her 4 saatlik mum kapanisindan 7 dk sonra (TR saati: 03:07 07:07 11:07 15:07 19:07 23:07)
+    - cron: "7 0,4,8,12,16,20 * * *"
+  workflow_dispatch: {}   # elle calistirinca Telegram'a durum mesaji da gelir
+
+permissions:
+  contents: write   # sadece ayda bir "canli tut" kaydi icin (GitHub 60 gun kurali)
 
 jobs:
   check-signal:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -23,7 +27,20 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           SYMBOL: BTCUSDT
-          INTERVAL: 15m
-          FAST_SMA: "9"
-          SLOW_SMA: "21"
+          INTERVAL: 4h
+          RISK_PCT: "1"
+          SEND_STATUS: ${{ github.event_name == 'workflow_dispatch' }}
         run: python signal_check.py
+
+      # Public repolarda 60 gun hic degisiklik olmazsa GitHub zamanlanmis
+      # calismayi durdurur. Her ayin 1'inde kucuk bir kayit atip bunu onler.
+      - name: Canli tut (ayda bir)
+        if: github.event_name == 'schedule'
+        run: |
+          if [ "$(date -u +%d)" = "01" ] && [ "$(date -u +%H)" -lt 4 ]; then
+            date -u > .keepalive
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .keepalive
+            git commit -m "keepalive" && git push || true
+          fi
